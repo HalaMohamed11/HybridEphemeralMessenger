@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { Avatar } from '@/components/Avatar';
 import styles from '@/styles/PresenceTracker.module.css';
 
 interface PresenceTrackerProps {
@@ -31,7 +32,7 @@ export const PresenceTracker: React.FC<PresenceTrackerProps> = ({
               className={`${styles.userItem} ${selectedUser === user.uid ? styles.selected : ''}`}
               onClick={() => onSelectUser(user.uid)}
             >
-              {user.photoURL && <img src={user.photoURL} alt={user.displayName} className={styles.avatar} />}
+              <Avatar src={user.photoURL} alt={user.displayName} size={28} className={styles.avatar} />
               <div className={styles.userInfo}>
                 <div className={styles.userName}>{user.displayName}</div>
                 <span className={`${styles.status} ${user.status === 'active' ? styles.active : styles.offline}`}>

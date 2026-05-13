@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { SystemPulseEvent } from '@/hooks/useMessaging';
 import styles from '@/styles/SystemPulse.module.css';
 
@@ -9,6 +9,12 @@ interface SystemPulseProps {
 }
 
 export const SystemPulseMonitor: React.FC<SystemPulseProps> = ({ events }) => {
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [events]);
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -29,6 +35,7 @@ export const SystemPulseMonitor: React.FC<SystemPulseProps> = ({ events }) => {
             </div>
           ))
         )}
+        <div ref={bottomRef} />
       </div>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { AuthUser } from '@/hooks/useAuth';
+import { Avatar } from '@/components/Avatar';
 import styles from '@/styles/Auth.module.css';
 
 interface AuthPaneProps {
@@ -102,7 +103,7 @@ export const AuthPane: React.FC<AuthPaneProps> = ({
   return (
     <div className={styles.container}>
       <div className={styles.userBox}>
-        {user.photoURL && <img src={user.photoURL} alt={user.displayName || 'User'} className={styles.avatar} />}
+        <Avatar src={user.photoURL} alt={user.displayName || 'User'} size={52} className={styles.avatar} />
         <div className={styles.userInfo}>
           <span className={styles.name}>{user.displayName}</span>
           <span className={styles.email}>{user.email}</span>

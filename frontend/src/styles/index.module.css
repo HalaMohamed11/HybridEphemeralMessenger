@@ -2,22 +2,22 @@
   display: flex;
   height: 100vh;
   width: 100%;
-  background: #0a0e27;
-  gap: 12px;
-  padding: 12px;
+  background: #111111;
+  gap: 8px;
+  padding: 8px;
   overflow: hidden;
 }
 
 .authSection {
-  width: 250px;
+  width: 240px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   overflow-y: auto;
 }
 
 .presenceSection {
-  width: 250px;
+  width: 220px;
   flex-shrink: 0;
 }
 
@@ -25,7 +25,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -44,11 +44,10 @@
 }
 
 .statusBar {
-  padding: 8px 12px;
-  background: #1a1f3a;
-  border: 1px solid #D4AF37;
-  border-radius: 2px;
-  color: #D4AF37;
+  padding: 6px 10px;
+  background: #1a1a1a;
+  border: 1px solid #2e2e2e;
+  color: #666666;
   font-size: 11px;
   display: flex;
   justify-content: space-between;
@@ -60,29 +59,18 @@
 }
 
 .statusIndicator {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   margin-left: 8px;
-  animation: pulse 1.5s infinite;
 }
 
 .statusIndicator.connected {
-  background: #D4AF37;
+  background: #aaaaaa;
 }
 
 .statusIndicator.disconnected {
-  background: #ff3333;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
+  background: #444444;
 }
 
 @media (max-width: 1200px) {
@@ -91,6 +79,6 @@
   }
 
   .presenceSection {
-    width: 200px;
+    width: 180px;
   }
 }

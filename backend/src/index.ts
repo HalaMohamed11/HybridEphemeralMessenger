@@ -23,7 +23,10 @@ const io = new SocketIOServer(httpServer, {
 });
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true,
+}));
 app.use(express.json());
 
 // Routes
@@ -47,7 +50,7 @@ const initializeServices = async () => {
     await initRedis();
 
     console.log('Setting up Socket.io...');
-    setupSocketIO(io);
+    await setupSocketIO(io);
 
     console.log('All services initialized');
   } catch (error) {

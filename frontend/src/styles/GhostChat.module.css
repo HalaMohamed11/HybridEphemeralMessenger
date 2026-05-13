@@ -2,16 +2,15 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #0a0e27;
-  border: 2px solid #D4AF37;
-  border-radius: 4px;
+  background: #111111;
+  border: 1px solid #2e2e2e;
   overflow: hidden;
 }
 
 .header {
-  padding: 12px;
-  background: #1a1f3a;
-  border-bottom: 2px solid #D4AF37;
+  padding: 10px 12px;
+  background: #1a1a1a;
+  border-bottom: 1px solid #2e2e2e;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -20,30 +19,37 @@
 
 .selectedUserInfo {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
 }
 
+.headerAvatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 1px solid #333333;
+  object-fit: cover;
+}
+
 .userName {
-  color: #D4AF37;
+  color: #e8e8e8;
   font-weight: bold;
 }
 
 .status {
   font-size: 10px;
-  font-weight: bold;
 }
 
 .status.active {
-  color: #D4AF37;
+  color: #aaaaaa;
 }
 
 .status.offline {
-  color: #ff3333;
+  color: #444444;
 }
 
 .noSelection {
-  color: #666666;
+  color: #555555;
   font-style: italic;
 }
 
@@ -54,11 +60,11 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  background: #0a0e27;
+  background: #111111;
 }
 
 .emptyState {
-  color: #666666;
+  color: #444444;
   text-align: center;
   margin: auto;
   font-style: italic;
@@ -71,20 +77,37 @@
   word-break: break-word;
 }
 
+.msgAvatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid #2e2e2e;
+  object-fit: cover;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.msgBody {
+  display: flex;
+  gap: 6px;
+  flex: 1;
+  align-items: baseline;
+}
+
 .message.sent {
-  color: #D4AF37;
+  color: #e8e8e8;
   margin-left: 20px;
 }
 
 .message.received {
-  color: #ffff00;
+  color: #aaaaaa;
   margin-left: 0;
 }
 
 .label {
   flex-shrink: 0;
   font-weight: bold;
-  min-width: 100px;
+  color: #888888;
 }
 
 .content {
@@ -94,15 +117,15 @@
 }
 
 .timestamp {
-  color: #666666;
+  color: #444444;
   font-size: 10px;
   flex-shrink: 0;
 }
 
 .inputForm {
-  border-top: 2px solid #D4AF37;
-  padding: 12px;
-  background: #1a1f3a;
+  border-top: 1px solid #2e2e2e;
+  padding: 10px 12px;
+  background: #1a1a1a;
   display: flex;
   gap: 8px;
 }
@@ -111,13 +134,13 @@
   flex: 1;
   display: flex;
   align-items: center;
-  border: 1px solid #D4AF37;
+  border: 1px solid #2e2e2e;
   padding: 0 8px;
-  background: #0a0e27;
+  background: #0d0d0d;
 }
 
 .prompt {
-  color: #D4AF37;
+  color: #555555;
   font-weight: bold;
   margin-right: 4px;
 }
@@ -126,7 +149,7 @@
   flex: 1;
   background: transparent;
   border: none;
-  color: #D4AF37;
+  color: #d8d8d8;
   outline: none;
   font-family: 'Monaco', monospace;
   font-size: 12px;
@@ -134,34 +157,32 @@
 }
 
 .input::placeholder {
-  color: #666666;
+  color: #444444;
 }
 
 .input:disabled {
-  color: #666666;
+  color: #333333;
   cursor: not-allowed;
 }
 
 .sendBtn {
-  background: #D4AF37;
-  color: #0a0e27;
-  border: 1px solid #D4AF37;
-  padding: 6px 16px;
+  background: #e8e8e8;
+  color: #111111;
+  border: none;
+  padding: 6px 14px;
   cursor: pointer;
   font-family: 'Monaco', monospace;
   font-weight: bold;
-  border-radius: 2px;
-  transition: all 0.2s;
+  font-size: 12px;
+  transition: background 0.15s;
 }
 
 .sendBtn:hover:not(:disabled) {
-  background: #E5C158;
-  box-shadow: 0 0 8px #D4AF37;
+  background: #ffffff;
 }
 
 .sendBtn:disabled {
-  background: #333333;
-  color: #666666;
-  border-color: #666666;
+  background: #222222;
+  color: #444444;
   cursor: not-allowed;
 }

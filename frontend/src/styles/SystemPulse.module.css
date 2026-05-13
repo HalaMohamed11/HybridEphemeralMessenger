@@ -2,42 +2,46 @@
   display: flex;
   flex-direction: column;
   height: 100%;
-  background: #0a0e27;
-  border: 2px solid #00ffff;
-  border-radius: 4px;
+  background: #111111;
+  border: 1px solid #2e2e2e;
   overflow: hidden;
 }
 
 .header {
-  padding: 12px;
-  background: #1a1f3a;
-  border-bottom: 2px solid #00ffff;
+  padding: 10px 12px;
+  background: #1a1a1a;
+  border-bottom: 1px solid #2e2e2e;
   font-weight: bold;
-  color: #00ffff;
+  color: #888888;
+  font-size: 11px;
+  letter-spacing: 1px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
 
 .title {
-  margin-right: 8px;
+  flex: 1;
 }
 
 .eventCount {
-  color: #666666;
-  font-size: 11px;
+  color: #444444;
+  font-size: 10px;
 }
 
 .eventsContainer {
   flex: 1;
   overflow-y: auto;
-  padding: 12px;
+  padding: 10px 12px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  background: #0a0e27;
+  gap: 1px;
+  background: #111111;
   font-size: 11px;
 }
 
 .placeholder {
-  color: #666666;
+  color: #444444;
   text-align: center;
   margin: auto;
   font-style: italic;
@@ -45,41 +49,41 @@
 
 .event {
   display: flex;
-  gap: 4px;
-  align-items: center;
+  gap: 6px;
+  align-items: baseline;
   word-break: break-word;
-  padding: 2px 0;
+  padding: 1px 0;
 }
 
 .event.info {
-  color: #00ffff;
+  color: #c0c0c0;
 }
 
 .event.warning {
-  color: #ffff00;
+  color: #888888;
 }
 
 .event.error {
-  color: #ff3333;
+  color: #666666;
 }
 
 .bracket {
-  color: #00ffff;
-  font-weight: bold;
+  color: #444444;
   flex-shrink: 0;
 }
 
 .type {
   font-weight: bold;
   flex-shrink: 0;
-  min-width: 50px;
+  min-width: 54px;
+  color: #aaaaaa;
 }
 
 .timestamp {
-  color: #666666;
+  color: #444444;
   font-size: 10px;
   flex-shrink: 0;
-  min-width: 80px;
+  min-width: 78px;
 }
 
 .message {

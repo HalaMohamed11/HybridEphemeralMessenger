@@ -1,6 +1,6 @@
 import { Socket, Server as SocketIOServer } from 'socket.io';
 import { verifyToken } from '@/services/firebase';
-import { storeMessage, fetchAndDeleteMessages, setUserPresence, getActiveUsers } from '@/services/redis';
+import { storeMessage, fetchAndDeleteMessages, setUserPresence, getActiveUsers, subscribeToKeyspaceNotifications } from '@/services/redis';
 import { getUserByUID } from '@/services/mongodb';
 
 interface AuthenticatedSocket extends Socket {
@@ -9,7 +9,7 @@ interface AuthenticatedSocket extends Socket {
   userPhotoURL?: string;
 }
 
-export const setupSocketIO = (io: SocketIOServer) => {
+export const setupSocketIO = async (io: SocketIOServer) => {
   // Middleware for authentication
   io.use(async (socket: AuthenticatedSocket, next) => {
     try {
@@ -21,12 +21,10 @@ export const setupSocketIO = (io: SocketIOServer) => {
       const decodedToken = await verifyToken(token);
       socket.userId = decodedToken.uid;
 
-      // Fetch user from MongoDB
+      // Fetch user from MongoDB, fall back to Firebase token fields
       const user = await getUserByUID(decodedToken.uid);
-      if (user) {
-        socket.userDisplayName = user.displayName;
-        socket.userPhotoURL = user.photoURL;
-      }
+      socket.userDisplayName = user?.displayName || (decodedToken as any).name || 'Unknown';
+      socket.userPhotoURL = user?.photoURL || (decodedToken as any).picture;
 
       next();
     } catch (error) {
@@ -65,10 +63,13 @@ export const setupSocketIO = (io: SocketIOServer) => {
       timestamp: new Date().toLocaleTimeString(),
     });
 
-    // Set user as active in Redis
-    await setUserPresence(userId, 'active');
+    // Set user as active in Redis (include display info for presence broadcasts)
+    await setUserPresence(userId, 'active', {
+      displayName: socket.userDisplayName,
+      photoURL: socket.userPhotoURL,
+    });
 
-    // Broadcast presence update
+    // Broadcast updated presence list to all connected sockets (including this one)
     const activeUsers = await getActiveUsers();
     io.emit('presence', activeUsers);
 
@@ -189,6 +190,30 @@ export const setupSocketIO = (io: SocketIOServer) => {
       });
     });
   });
+
+  // Subscribe to Redis keyspace notifications to detect TTL expiry on chat keys
+  const subscriber = await subscribeToKeyspaceNotifications();
+  if (subscriber) {
+    await subscriber.subscribe('__keyevent@0__:expired', (expiredKey: string) => {
+      if (!expiredKey.startsWith('chat:')) return;
+
+      const uids = expiredKey.replace('chat:', '').split(':');
+
+      // Notify every connected socket that belongs to either user in the conversation
+      io.sockets.sockets.forEach((s) => {
+        const authSocket = s as AuthenticatedSocket;
+        if (authSocket.userId && uids.includes(authSocket.userId)) {
+          authSocket.emit('wipe');
+          authSocket.emit('system_pulse', {
+            type: 'GHOST',
+            message: `TTL reached 0. Redis memory purged. Sending WIPE signal...`,
+            severity: 'warning',
+            timestamp: new Date().toLocaleTimeString(),
+          });
+        }
+      });
+    });
+  }
 };
 
 export default setupSocketIO;

@@ -124,9 +124,8 @@ export const useMessaging = (userToken: string | null, currentUserUID: string | 
         const message: Message = {
           sender: currentUserUID,
           senderName: 'You',
-          content: content, // Show plain text to sender
+          content: content,
           timestamp: new Date().toLocaleTimeString(),
-          encrypted: true,
         };
 
         setMessages((prev) => [...prev, message]);

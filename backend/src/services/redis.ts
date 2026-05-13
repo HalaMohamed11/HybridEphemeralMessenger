@@ -68,10 +68,18 @@ export const deleteMessages = async (conversationKey: string) => {
   }
 };
 
-export const setUserPresence = async (uid: string, status: 'active' | 'offline') => {
+export const setUserPresence = async (
+  uid: string,
+  status: 'active' | 'offline',
+  userInfo?: { displayName?: string; photoURL?: string }
+) => {
   try {
     if (status === 'active') {
-      await redisClient.setEx(`presence:${uid}`, 3600, JSON.stringify({ status: 'active' }));
+      await redisClient.setEx(
+        `presence:${uid}`,
+        3600,
+        JSON.stringify({ uid, status: 'active', ...userInfo })
+      );
     } else {
       await redisClient.del(`presence:${uid}`);
     }
@@ -109,7 +117,14 @@ export const deletePendingMFA = async (sessionToken: string) => {
 export const getActiveUsers = async () => {
   try {
     const keys = await redisClient.keys('presence:*');
-    return keys.map((key: string) => key.replace('presence:', ''));
+    const users = await Promise.all(
+      keys.map(async (key: string) => {
+        const data = await redisClient.get(key);
+        if (data) return JSON.parse(data);
+        return { uid: key.replace('presence:', ''), status: 'active' };
+      })
+    );
+    return users;
   } catch (error) {
     console.error('Error getting active users:', error);
     return [];
