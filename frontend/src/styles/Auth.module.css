@@ -103,3 +103,25 @@
   padding: 8px 16px;
   font-size: 12px;
 }
+
+.otpForm {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.otpInput {
+  background: #000;
+  border: 1px solid #D4AF37;
+  color: #D4AF37;
+  padding: 12px;
+  font-size: 24px;
+  text-align: center;
+  letter-spacing: 8px;
+  font-family: 'Monaco', monospace;
+  outline: none;
+}
+
+.otpInput:focus {
+  box-shadow: 0 0 8px #D4AF37;
+}

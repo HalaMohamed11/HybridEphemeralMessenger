@@ -7,7 +7,7 @@ export const initRedis = async () => {
     url: process.env.REDIS_URL || 'redis://localhost:6379',
   });
 
-  redisClient.on('error', (err) => console.error('Redis error:', err));
+  redisClient.on('error', (err: Error) => console.error('Redis error:', err));
   redisClient.on('connect', () => console.log('Redis connected'));
 
   await redisClient.connect();
@@ -40,9 +40,22 @@ export const storeMessage = async (
 export const getMessages = async (conversationKey: string) => {
   try {
     const messages = await redisClient.lRange(conversationKey, 0, -1);
-    return messages.map((msg) => JSON.parse(msg));
+    return messages.map((msg: string) => JSON.parse(msg));
   } catch (error) {
     console.error('Error retrieving messages:', error);
+    return [];
+  }
+};
+
+export const fetchAndDeleteMessages = async (conversationKey: string) => {
+  try {
+    const multi = redisClient.multi();
+    multi.lRange(conversationKey, 0, -1);
+    multi.del(conversationKey);
+    const [messages] = await multi.exec() as [string[], any];
+    return messages.map((msg: string) => JSON.parse(msg));
+  } catch (error) {
+    console.error('Error in fetchAndDeleteMessages:', error);
     return [];
   }
 };
@@ -67,10 +80,36 @@ export const setUserPresence = async (uid: string, status: 'active' | 'offline')
   }
 };
 
+export const setPendingMFA = async (sessionToken: string, data: any, ttlSeconds: number = 300) => {
+  try {
+    await redisClient.setEx(`PENDING_MFA:${sessionToken}`, ttlSeconds, JSON.stringify(data));
+  } catch (error) {
+    console.error('Error setting pending MFA:', error);
+  }
+};
+
+export const getPendingMFA = async (sessionToken: string) => {
+  try {
+    const data = await redisClient.get(`PENDING_MFA:${sessionToken}`);
+    return data ? JSON.parse(data) : null;
+  } catch (error) {
+    console.error('Error getting pending MFA:', error);
+    return null;
+  }
+};
+
+export const deletePendingMFA = async (sessionToken: string) => {
+  try {
+    await redisClient.del(`PENDING_MFA:${sessionToken}`);
+  } catch (error) {
+    console.error('Error deleting pending MFA:', error);
+  }
+};
+
 export const getActiveUsers = async () => {
   try {
     const keys = await redisClient.keys('presence:*');
-    return keys.map((key) => key.replace('presence:', ''));
+    return keys.map((key: string) => key.replace('presence:', ''));
   } catch (error) {
     console.error('Error getting active users:', error);
     return [];

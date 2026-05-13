@@ -1,6 +1,6 @@
 import { Socket, Server as SocketIOServer } from 'socket.io';
 import { verifyToken } from '@/services/firebase';
-import { storeMessage, getMessages, setUserPresence, getActiveUsers } from '@/services/redis';
+import { storeMessage, fetchAndDeleteMessages, setUserPresence, getActiveUsers } from '@/services/redis';
 import { getUserByUID } from '@/services/mongodb';
 
 interface AuthenticatedSocket extends Socket {
@@ -43,6 +43,13 @@ export const setupSocketIO = (io: SocketIOServer) => {
     console.log(`User ${userName} (${userId}) connected. Socket ID: ${socket.id}`);
 
     // Emit AUTH system pulse
+    socket.emit('system_pulse', {
+      type: 'AUTH',
+      message: `MFA Verified. Session promoted to SECURE.`,
+      severity: 'info',
+      timestamp: new Date().toLocaleTimeString(),
+    });
+
     socket.emit('system_pulse', {
       type: 'AUTH',
       message: `Token verified for ${userName} (UID: ${userId.substring(0, 8)}...)`,
@@ -113,17 +120,56 @@ export const setupSocketIO = (io: SocketIOServer) => {
       }
     });
 
+    // Handle fetching history (Fetch + Delete for ephemerality)
+    socket.on('fetch_history', async (data: { recipient: string; sender: string }) => {
+      try {
+        const { recipient, sender } = data;
+        const conversationKey = [sender, recipient].sort().join(':');
+        const key = `chat:${conversationKey}`;
+
+        const messages = await fetchAndDeleteMessages(key);
+
+        socket.emit('history', messages);
+
+        // Emit REDIS system pulse
+        socket.emit('system_pulse', {
+          type: 'REDIS',
+          message: `MULTI/EXEC fetch+delete on '${key.substring(0, 16)}...'. History purged.`,
+          severity: 'warning',
+          timestamp: new Date().toLocaleTimeString(),
+        });
+      } catch (error) {
+        console.error('Error fetching history:', error);
+      }
+    });
+
+    // Handle manual disconnect for instant presence wipe
+    socket.on('manual_disconnect', async () => {
+      console.log(`User ${userName} (${userId}) manually disconnected.`);
+      await setUserPresence(userId, 'offline');
+      
+      socket.emit('system_pulse', {
+        type: 'SOCKET',
+        message: `User ${userName} manual wipe requested.`,
+        severity: 'warning',
+        timestamp: new Date().toLocaleTimeString(),
+      });
+
+      const activeUsers = await getActiveUsers();
+      io.emit('presence', activeUsers);
+    });
+
     // Handle disconnect
     socket.on('disconnect', async () => {
       console.log(`User ${userName} (${userId}) disconnected`);
 
-      // Remove presence
+      // Remove presence if not already removed by manual_disconnect
       await setUserPresence(userId, 'offline');
 
       // Emit SOCKET system pulse
       socket.emit('system_pulse', {
         type: 'SOCKET',
-        message: `User ${userName} disconnected.`,
+        message: `User ${userName} connection closed.`,
         severity: 'warning',
         timestamp: new Date().toLocaleTimeString(),
       });
@@ -133,7 +179,7 @@ export const setupSocketIO = (io: SocketIOServer) => {
       io.emit('presence', activeUsers);
     });
 
-    socket.on('error', (error) => {
+    socket.on('error', (error: any) => {
       console.error(`Socket error for ${userId}:`, error);
       socket.emit('system_pulse', {
         type: 'SOCKET',

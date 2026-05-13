@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Socket } from 'socket.io-client';
 import { initSocket, getSocket, disconnectSocket } from '@/lib/socket';
-import { encryptMessage } from '@/lib/encryption';
+import { encryptMessage, decryptMessage } from '@/lib/encryption';
 
 export interface SystemPulseEvent {
   timestamp: string;
@@ -35,6 +35,16 @@ export const useMessaging = (userToken: string | null, currentUserUID: string | 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const addSystemPulse = useCallback((type: SystemPulseEvent['type'], message: string, severity?: 'info' | 'warning' | 'error') => {
+    const event: SystemPulseEvent = {
+      type,
+      message,
+      severity,
+      timestamp: new Date().toLocaleTimeString(),
+    };
+    setSystemPulse((prev) => [...prev, event]);
+  }, []);
+
   // Initialize Socket.io connection
   useEffect(() => {
     if (!userToken || !currentUserUID) return;
@@ -44,6 +54,12 @@ export const useMessaging = (userToken: string | null, currentUserUID: string | 
       setSocket(newSocket);
       setLoading(true);
 
+      const handleBeforeUnload = () => {
+        newSocket.emit('manual_disconnect');
+      };
+
+      window.addEventListener('beforeunload', handleBeforeUnload);
+
       newSocket.on('connect', () => {
         console.log('Socket connected');
         addSystemPulse('SOCKET', `Connected to messaging server (Socket ID: ${newSocket.id})`, 'info');
@@ -51,7 +67,9 @@ export const useMessaging = (userToken: string | null, currentUserUID: string | 
       });
 
       newSocket.on('message', (message: Message) => {
-        setMessages((prev) => [...prev, message]);
+        // Decrypt incoming message
+        const decryptedContent = decryptMessage(message.content);
+        setMessages((prev) => [...prev, { ...message, content: decryptedContent }]);
       });
 
       newSocket.on('system_pulse', (event: SystemPulseEvent) => {
@@ -79,6 +97,7 @@ export const useMessaging = (userToken: string | null, currentUserUID: string | 
       });
 
       return () => {
+        window.removeEventListener('beforeunload', handleBeforeUnload);
         newSocket.disconnect();
         disconnectSocket();
       };
@@ -87,17 +106,7 @@ export const useMessaging = (userToken: string | null, currentUserUID: string | 
       setError(errorMessage);
       setLoading(false);
     }
-  }, [userToken, currentUserUID]);
-
-  const addSystemPulse = useCallback((type: SystemPulseEvent['type'], message: string, severity?: 'info' | 'warning' | 'error') => {
-    const event: SystemPulseEvent = {
-      type,
-      message,
-      severity,
-      timestamp: new Date().toLocaleTimeString(),
-    };
-    setSystemPulse((prev) => [...prev, event]);
-  }, []);
+  }, [userToken, currentUserUID, addSystemPulse]);
 
   const sendMessage = useCallback(
     async (recipientUID: string, content: string) => {
@@ -111,10 +120,11 @@ export const useMessaging = (userToken: string | null, currentUserUID: string | 
           sender: currentUserUID,
         });
 
+        // Add local message (plain text for sender's view, or show encrypted if preferred)
         const message: Message = {
           sender: currentUserUID,
           senderName: 'You',
-          content: encryptedContent,
+          content: content, // Show plain text to sender
           timestamp: new Date().toLocaleTimeString(),
           encrypted: true,
         };
@@ -135,7 +145,27 @@ export const useMessaging = (userToken: string | null, currentUserUID: string | 
   const selectUser = useCallback((uid: string | null) => {
     setSelectedUser(uid);
     setMessages([]);
-  }, []);
+    if (uid && socket && currentUserUID) {
+      socket.emit('fetch_history', { recipient: uid, sender: currentUserUID });
+    }
+  }, [socket, currentUserUID]);
+
+  // Listen for history
+  useEffect(() => {
+    if (!socket) return;
+
+    socket.on('history', (historyMessages: Message[]) => {
+      const decryptedMessages = historyMessages.map(msg => ({
+        ...msg,
+        content: decryptMessage(msg.content)
+      }));
+      setMessages(decryptedMessages);
+    });
+
+    return () => {
+      socket.off('history');
+    };
+  }, [socket]);
 
   return {
     socket,

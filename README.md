@@ -387,43 +387,91 @@ Authorization: Bearer <Firebase_ID_Token>
 
 ---
 
-## 🎁 Bonus Features
+## 🌟 Features Implemented
 
-### Bonus 1: Atomic "Read-Once" Logic
-```typescript
-// Redis transaction: Fetch & Delete simultaneously
-const message = await redis.multi()
-  .lRange(key, 0, 0)
-  .lTrim(key, 1, -1)
-  .exec();
-// Message visible only once, then deleted
+### 1. **OTP Dispatch & MFA Flow**
+- **Trigger**: Upon Google Login, the backend generates a 6-digit OTP.
+- **Redis State**: The user session is held in `PENDING_MFA` state in Redis.
+- **Dispatch**: OTP is logged to the backend console (simulating SMS/Email dispatch).
+- **Verification**: User must enter the OTP on the frontend to complete authentication and persist their profile to MongoDB.
+
+### 2. **Frontend Message Encryption**
+- **Mechanism**: AES-256 encryption using `crypto-js`.
+- **Flow**: Messages are encrypted on the sender's device before being emitted via Socket.io.
+- **Storage**: Only ciphertext is stored in Redis.
+- **Decryption**: Incoming messages are decrypted on the receiver's device.
+- **Security**: The backend never sees the plaintext content.
+
+### 3. **MULTI/EXEC Fetch+Delete (Extreme Ephemerality)**
+- **Logic**: When a user selects a conversation, the backend uses a Redis `MULTI/EXEC` transaction to `LRANGE` (fetch) and `DEL` (delete) the messages.
+- **Outcome**: Messages can be read exactly once. Once fetched by the client, they are purged from Redis memory immediately.
+
+### 4. **Instant Presence Wipe**
+- **Mechanism**: `beforeunload` event listener on the frontend.
+- **Logic**: Emits a `manual_disconnect` event to the server on tab close.
+- **Outcome**: User status changes to ● offline instantly, bypassing the default socket timeout.
+
+### 5. **System Pulse Integration**
+- **New Events**:
+  - `[REDIS]`: Logged during MULTI/EXEC fetch+delete operations.
+  - `[SOCKET]`: Logged during manual wipe/disconnect.
+  - `[AUTH]`: Logged during OTP generation and verification.
+
+---
+
+## 🚀 Run Instructions
+
+### 1. **Install Dependencies**
+```bash
+# Root
+npm install
+
+# Backend
+cd HybridEphemeralMessenger-main/backend
+npm install
+
+# Frontend
+cd ../frontend
+npm install
 ```
 
-### Bonus 2: Burn-on-Disconnect
-```typescript
-// Immediately wipe presence on tab close
-socket.on('disconnect', async () => {
-  await setUserPresence(userId, 'offline');
-  // User disappears from friends' lists instantly
-});
+### 2. **Environment Setup**
+Ensure your `.env` files are configured as per `README.md` instructions.
+
+### 3. **Start Services**
+```bash
+# Terminal 1: Backend
+cd HybridEphemeralMessenger-main/backend
+npm run dev
+
+# Terminal 2: Frontend
+cd HybridEphemeralMessenger-main/frontend
+npm run dev
 ```
 
-### Bonus 3: Encrypted Payloads
-```typescript
-// Client-side encryption before sending
-const encrypted = encryptMessage(message);
-socket.emit('send_message', { content: encrypted });
-// Admin sees only ciphertext in Redis
-```
+### 4. **Verification (Smoke Test)**
+1. Open `http://localhost:3000`.
+2. Login with Google.
+3. Check **Backend Console** for `[OTP DISPATCH]` log.
+4. Enter the code in the UI.
+5. Open a second browser tab and login as another user.
+6. Send a message - check Redis (using `redis-cli`) to see only ciphertext.
+7. Close a tab - check other tab's presence list (wipe should be instant).
 
-### Bonus 2: Multi-Factor Authentication (MFA) via Twilio
-```typescript
-// After Google OAuth, backend sends OTP via SMS
-// User must enter 6-digit code before accessing chat
-[TWILIO]: MFA Challenge dispatched to +20XXXXXX...
-[AUTH]: Awaiting SMS code verification.
-[TWILIO]: SMS Code Verified. Session promoted to SECURE.
-```
+---
+
+## 🤝 Socket Event Names
+
+| Event Name | Direction | Payload | Description |
+|------------|-----------|---------|-------------|
+| `send_message` | C -> S | `{recipient, content, sender}` | Send encrypted message |
+| `fetch_history` | C -> S | `{recipient, sender}` | Fetch and delete history (MULTI/EXEC) |
+| `manual_disconnect`| C -> S | — | Trigger instant presence wipe |
+| `message` | S -> C | `{sender, senderName, content, timestamp}` | Incoming encrypted message |
+| `history` | S -> C | `Message[]` | History payload (pre-deleted on server) |
+| `system_pulse` | S -> C | `{type, message, severity, timestamp}` | Backend log events |
+| `presence` | S -> C | `PresenceUser[]` | Online users list |
+| `wipe` | S -> C | — | Global TTL wipe signal |
 
 ---
 

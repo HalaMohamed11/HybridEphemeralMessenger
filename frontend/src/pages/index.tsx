@@ -10,7 +10,15 @@ import { PresenceTracker } from '@/components/PresenceTracker';
 import styles from '@/styles/index.module.css';
 
 export default function Home() {
-  const { user, loading: authLoading, error: authError, login, logout } = useAuth();
+  const { 
+    user, 
+    loading: authLoading, 
+    error: authError, 
+    login, 
+    logout, 
+    verifyOTP, 
+    mfaRequired 
+  } = useAuth();
   const {
     messages,
     systemPulse,
@@ -22,16 +30,34 @@ export default function Home() {
     selectUser,
   } = useMessaging(user?.idToken || null, user?.uid || null);
 
-  // If not authenticated, show auth pane
-  if (!user) {
-    return <AuthPane user={user} loading={authLoading} error={authError} onLogin={login} onLogout={logout} />;
+  // If not authenticated or MFA required, show auth pane
+  if (!user || mfaRequired) {
+    return (
+      <AuthPane 
+        user={user} 
+        loading={authLoading} 
+        error={authError} 
+        onLogin={login} 
+        onLogout={logout}
+        onVerifyOTP={verifyOTP}
+        mfaRequired={mfaRequired}
+      />
+    );
   }
 
   return (
     <div className={styles.mainLayout}>
       {/* Left: Auth Pane */}
       <div className={styles.authSection}>
-        <AuthPane user={user} loading={authLoading} error={authError} onLogin={login} onLogout={logout} />
+        <AuthPane 
+          user={user} 
+          loading={authLoading} 
+          error={authError} 
+          onLogin={login} 
+          onLogout={logout}
+          onVerifyOTP={verifyOTP}
+          mfaRequired={mfaRequired}
+        />
       </div>
 
       {/* Center: Presence Tracker */}

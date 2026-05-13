@@ -8,12 +8,24 @@ interface AuthPaneProps {
   user: AuthUser | null;
   loading: boolean;
   error: string | null;
-  onLogin: () => Promise<void>;
+  mfaRequired?: boolean;
+  onLogin: () => Promise<any>;
   onLogout: () => Promise<void>;
+  onVerifyOTP?: (otp: string) => Promise<void>;
 }
 
-export const AuthPane: React.FC<AuthPaneProps> = ({ user, loading, error, onLogin, onLogout }) => {
+export const AuthPane: React.FC<AuthPaneProps> = ({ 
+  user, 
+  loading, 
+  error, 
+  mfaRequired, 
+  onLogin, 
+  onLogout,
+  onVerifyOTP 
+}) => {
   const [isLoggingIn, setIsLoggingIn] = React.useState(false);
+  const [otp, setOtp] = React.useState('');
+  const [isVerifying, setIsVerifying] = React.useState(false);
 
   const handleLogin = async () => {
     if (isLoggingIn) return;
@@ -25,10 +37,49 @@ export const AuthPane: React.FC<AuthPaneProps> = ({ user, loading, error, onLogi
     }
   };
 
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isVerifying || !onVerifyOTP) return;
+    setIsVerifying(true);
+    try {
+      await onVerifyOTP(otp);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsVerifying(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className={styles.container}>
         <div className={styles.loading}>Initializing...</div>
+      </div>
+    );
+  }
+
+  if (mfaRequired && onVerifyOTP) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.loginBox}>
+          <h1 className={styles.title}>OTP VERIFICATION</h1>
+          <p className={styles.subtitle}>Enter the 6-digit code dispatched to your account</p>
+          {error && <div className={styles.error}>{error}</div>}
+          <form onSubmit={handleVerify} className={styles.otpForm}>
+            <input
+              type="text"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              placeholder="000000"
+              maxLength={6}
+              className={styles.otpInput}
+              autoFocus
+            />
+            <button type="submit" disabled={isVerifying || otp.length !== 6} className={styles.loginBtn}>
+              {isVerifying ? 'Verifying...' : 'Verify OTP'}
+            </button>
+          </form>
+        </div>
       </div>
     );
   }
