@@ -1,0 +1,95 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #0a0e27;
+  border: 2px solid #ff00ff;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.header {
+  padding: 12px;
+  background: #1a1f3a;
+  border-bottom: 2px solid #ff00ff;
+  color: #ff00ff;
+  font-weight: bold;
+}
+
+.usersList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #0a0e27;
+}
+
+.noUsers {
+  color: #666666;
+  text-align: center;
+  margin: auto;
+  font-style: italic;
+}
+
+.userItem {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px;
+  background: #1a1f3a;
+  border: 1px solid #555555;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.userItem:hover {
+  border-color: #ff00ff;
+  box-shadow: 0 0 4px #ff00ff;
+}
+
+.userItem.selected {
+  background: #2a1f4a;
+  border-color: #ff00ff;
+  box-shadow: 0 0 8px #ff00ff;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #ff00ff;
+  object-fit: cover;
+}
+
+.userInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.userName {
+  color: #ff00ff;
+  font-weight: bold;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status {
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.status.active {
+  color: #D4AF37;
+}
+
+.status.offline {
+  color: #ff3333;
+}

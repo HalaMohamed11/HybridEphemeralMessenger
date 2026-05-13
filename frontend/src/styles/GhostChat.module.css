@@ -1,0 +1,167 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #0a0e27;
+  border: 2px solid #D4AF37;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.header {
+  padding: 12px;
+  background: #1a1f3a;
+  border-bottom: 2px solid #D4AF37;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+}
+
+.selectedUserInfo {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.userName {
+  color: #D4AF37;
+  font-weight: bold;
+}
+
+.status {
+  font-size: 10px;
+  font-weight: bold;
+}
+
+.status.active {
+  color: #D4AF37;
+}
+
+.status.offline {
+  color: #ff3333;
+}
+
+.noSelection {
+  color: #666666;
+  font-style: italic;
+}
+
+.messagesContainer {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: #0a0e27;
+}
+
+.emptyState {
+  color: #666666;
+  text-align: center;
+  margin: auto;
+  font-style: italic;
+}
+
+.message {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  word-break: break-word;
+}
+
+.message.sent {
+  color: #D4AF37;
+  margin-left: 20px;
+}
+
+.message.received {
+  color: #ffff00;
+  margin-left: 0;
+}
+
+.label {
+  flex-shrink: 0;
+  font-weight: bold;
+  min-width: 100px;
+}
+
+.content {
+  flex: 1;
+  word-break: break-all;
+  max-width: 70%;
+}
+
+.timestamp {
+  color: #666666;
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+.inputForm {
+  border-top: 2px solid #D4AF37;
+  padding: 12px;
+  background: #1a1f3a;
+  display: flex;
+  gap: 8px;
+}
+
+.inputWrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  border: 1px solid #D4AF37;
+  padding: 0 8px;
+  background: #0a0e27;
+}
+
+.prompt {
+  color: #D4AF37;
+  font-weight: bold;
+  margin-right: 4px;
+}
+
+.input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #D4AF37;
+  outline: none;
+  font-family: 'Monaco', monospace;
+  font-size: 12px;
+  padding: 4px 0;
+}
+
+.input::placeholder {
+  color: #666666;
+}
+
+.input:disabled {
+  color: #666666;
+  cursor: not-allowed;
+}
+
+.sendBtn {
+  background: #D4AF37;
+  color: #0a0e27;
+  border: 1px solid #D4AF37;
+  padding: 6px 16px;
+  cursor: pointer;
+  font-family: 'Monaco', monospace;
+  font-weight: bold;
+  border-radius: 2px;
+  transition: all 0.2s;
+}
+
+.sendBtn:hover:not(:disabled) {
+  background: #E5C158;
+  box-shadow: 0 0 8px #D4AF37;
+}
+
+.sendBtn:disabled {
+  background: #333333;
+  color: #666666;
+  border-color: #666666;
+  cursor: not-allowed;
+}

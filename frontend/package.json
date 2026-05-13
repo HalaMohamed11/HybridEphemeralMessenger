@@ -1,0 +1,25 @@
+{
+  "name": "hybrid-ephemeral-messenger-frontend",
+  "version": "1.0.0",
+  "description": "Frontend for Hybrid Ephemeral Messenger",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "next": "^14.0.0",
+    "firebase": "^10.0.0",
+    "socket.io-client": "^4.7.0",
+    "crypto-js": "^4.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.2.0",
+    "typescript": "^5.0.0"
+  }
+}

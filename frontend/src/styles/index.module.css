@@ -1,0 +1,96 @@
+.mainLayout {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  background: #0a0e27;
+  gap: 12px;
+  padding: 12px;
+  overflow: hidden;
+}
+
+.authSection {
+  width: 250px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.presenceSection {
+  width: 250px;
+  flex-shrink: 0;
+}
+
+.chatSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.pulseSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ghostChatPane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.statusBar {
+  padding: 8px 12px;
+  background: #1a1f3a;
+  border: 1px solid #D4AF37;
+  border-radius: 2px;
+  color: #D4AF37;
+  font-size: 11px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.statusMessage {
+  flex: 1;
+}
+
+.statusIndicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-left: 8px;
+  animation: pulse 1.5s infinite;
+}
+
+.statusIndicator.connected {
+  background: #D4AF37;
+}
+
+.statusIndicator.disconnected {
+  background: #ff3333;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@media (max-width: 1200px) {
+  .authSection {
+    width: 200px;
+  }
+
+  .presenceSection {
+    width: 200px;
+  }
+}
